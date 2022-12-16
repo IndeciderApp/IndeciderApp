@@ -1,71 +1,136 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Nearby Cafes</title>
-  <meta name="viewport" content="initial-scale=1.0">
-  <meta charset="utf-8">
-  <style>
-    /* Set the size of the map */
-    #map {
-      height: 400px;
-      width: 400px;
-    }
-  </style>
-    <!-- Include the Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeWCL9MAAj_ZXzCK0KGIk400Q2SfOqSOA&libraries=places"></script>
-</head>
-<body>
-  <!-- The div element for the map -->
-  <div id="map"></div>
-  <script>
-    // The JavaScript for the map
-    var map;
+<!--
+    Winhweel.js responsive wheel example by Douglas McKechie @ www.dougtesting.net
+    See website for tutorials and other documentation.
 
-    // Get the user's current location
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
+    The MIT License (MIT)
 
-    // Initialize the map
-    var map = new google.maps.Map(document.getElementById('map'), {
-      center: pos,
-      zoom: 18
-    });
+    Copyright (c) 2019 Douglas McKechie
 
-      // Search for nearby cafes
-      var service = new google.maps.places.PlacesService(map);
-      service.nearbySearch({
-        location: pos,
-        radius: 150,
-        type: ['cafe']
-      }, callback);
-    });
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+-->
+<doctype html>
+    <html>
+
+    <head>
+        <title>Nearby Cafes</title>
+        <!-- @TODO make the font-size for the text on the page responsive too -->
+        <link rel="stylesheet" href="main.css" type="text/css" />
+        <!-- Include the Google Maps API -->
+        <script
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeWCL9MAAj_ZXzCK0KGIk400Q2SfOqSOA&libraries=places,geometry"></script>
+        <script type="text/javascript" src="Winwheel.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+    </head>
+
+    <body>
+        <div align="center">
+            <h1>Indecider App</h1>
+            <br />
+            <p>Find a cafe in 150m.</p>
+            <br />
+            <br />
+            <div class="triangle-down"></div>
+            <!-- Always set canvas to largest desired size, i.e. desktop PC size, it will be scaled down for smaller devices but never scaled up -->
+            <canvas id="canvas" width="500" height="500" data-responsiveMinWidth="180" data-responsiveScaleHeight="true"
+                onClick="startSpin();">
+                <p style="color: white" align="center">Sorry, your browser doesn't support canvas. Please try another.
+                </p>
+            </canvas>
+            <br /><br />
+            <p align="center">Tap the wheel to spin.</p>
+            <div id="map"></div>
+        </div>
+        <script>
+            var map;
+            var names = [];
+            var formattedNames = [];
+            var pos;
+            let theWheel;
 
 
-    // Handle the results of the search
-    function callback(results, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        //for (var i = 0; i < results.length; i++) {
+            // Get the user's current location
+            navigator.geolocation.getCurrentPosition(function (position) {
+                pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
 
-        //select a random number between 0 and the length of results
-        var random = Math.floor(Math.random() * results.length);
+                // Initialize the map
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    center: pos,
+                    zoom: 18
+                });
 
-        createMarker(results[random]);
-        console.log(results[random].name);
-        console.log(results[random].vicinity);
-        //}
-      }
-    }
+                // Search for nearby cafes
+                var service = new google.maps.places.PlacesService(map);
+                service.nearbySearch({
+                    location: pos,
+                    radius: 500,
+                    type: ['cafe']
+                }, callback);
+            });
 
-    // Create a marker for each cafe
-    function createMarker(place) {
-      var marker = new google.maps.Marker({
-        map: map,
-        position: place.geometry.location
-      });
-    }
-  </script>
-</body>
-</html>
+            // Handle the results of the search
+            function callback(results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    var names = [];
+                    for (var i = 0; i < results.length; i++) {
+                        names.push(results[i].name);
+                    }
+                    const formattedNames = names.map(name => ({ text: name }));
+                    console.log(names);
+                    console.log(formattedNames);
+                    makeWheel(names,formattedNames);
+                }
+            }
+
+            function makeWheel(names, formattedNames) {
+                // Create new wheel object specifying the parameters at creation time.
+                theWheel = new Winwheel({
+                    'numSegments': names.length,     // Specify number of segments.
+                    'textFontSize': 16,    // Set font size as desired.
+                    'responsive': true,  // This wheel is responsive!
+                    'segments': formattedNames,   // Define segments including colour and text.
+                    'animation':           // Specify the animation to use.
+                    {
+                        'type': 'spinToStop',
+                        'duration': 5,     // Duration in seconds.
+                        'spins': 8,     // Number of complete spins.
+                    }
+                });
+            }
+
+            // -----------------------------------------------------------------
+            // Called by the onClick of the canvas, starts the spinning.
+            function startSpin() {
+                // Stop any current animation.
+                theWheel.stopAnimation(false);
+
+                // Reset the rotation angle to less than or equal to 360 so spinning again
+                // works as expected. Setting to modulus (%) 360 keeps the current position.
+                theWheel.rotationAngle = theWheel.rotationAngle % 360;
+
+                // Start animation.
+                theWheel.startAnimation();
+            }
+
+        </script>
+    </body>
+
+    </html>
