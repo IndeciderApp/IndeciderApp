@@ -1,5 +1,6 @@
 body
 {
+    font-size: 16px;
     font-family: arial;
 }
 
@@ -10,11 +11,12 @@ h1, p
 }
 
 h1 {
-    font-size: 1.5em;
+    font-size: 1.5rem;
+    padding: 1rem;
 }
 
 p {
-    font-size: 0.8em;
+    font-size: 1rem;
 }
 
 canvas {
@@ -25,11 +27,73 @@ canvas {
     display: none;
 }
 
+button {
+    background-color: #F8DB00;
+    color:#000000;
+    border-radius: 24px;
+    border: 2px solid #000000;
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+    margin-top: 2rem;
+}
+
+button:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+
 .triangle-down {
+    margin-top: 32px;
     width: 0;
     height: 0;
     border-left: 25px solid transparent;
     border-right: 25px solid transparent;
-    border-top: 50px solid black;
+    border-top: 50px solid #0067F6;
   }
   
+  .slider {
+    -webkit-appearance: none;
+    width: 300px;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }
+
+  /***** Chrome, Safari, Opera, and Edge Chromium *****/
+input[type="range"]::-webkit-slider-runnable-track {
+    background: linear-gradient(270deg, #0067F6 -2.22%, #43E6EB 104.33%);
+    border: 3px solid #151515;
+    height: 1.5rem;
+    border-radius: 24px;
+  }
+  
+  /******** Firefox ********/
+  input[type="range"]::-moz-range-track {
+    background: linear-gradient(270deg, #0067F6 -2.22%, #43E6EB 104.33%);
+    border: 3px solid #151515;
+    height: 1.5rem;
+    border-radius: 24px;
+  }
+
+  /***** Thumb Styles *****/
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    margin-top: -16px; /* Centers thumb on the track */
+    background: #F8DB00;
+    border: 3px solid #000000;
+    height: 3rem;
+    width: 3rem;    
+    border-radius: 2rem;
+ }
+
+ /***** Firefox *****/
+input[type="range"]::-moz-range-thumb {
+    border: none; /*Removes extra border that FF applies*/
+    border-radius: 2rem; /*Removes default border-radius that FF applies*/
+    background: #F8DB00;
+    border: 3px solid #000000;
+    height: 3rem;
+    width: 3rem;
+}
+

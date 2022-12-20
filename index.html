@@ -15,9 +15,11 @@
     <body>
         <div align="center">
             <h1>Indecider App</h1>
+            <p>Can't pick a cafe?</p>
             <br />
-            <p>Find a cafe in 500m.</p>
-            <br />
+            <input type="range" min="50" max="1000" step="25" id="slider" value="500" class="slider">
+            <p style="margin-top: 12px;">Radius: <span id="output">500</span> metres</p>
+            <button onclick="findCafe()">Find Cafes</button>
             <br />
             <div class="triangle-down"></div>
             <!-- Always set canvas to largest desired size, i.e. desktop PC size, it will be scaled down for smaller devices but never scaled up -->
@@ -36,41 +38,56 @@
             var formattedNames = [];
             var pos;
             let theWheel;
+            var sliderRadius = 500;
 
+            // Get the slider elements
+            var slider = document.getElementById("slider");
+            var output = document.getElementById("output");
 
-            // Get the user's current location
-            navigator.geolocation.getCurrentPosition(function (position) {
-                pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
+            slider.oninput = function () {
+                sliderRadius = this.value;
+                output.innerHTML = sliderRadius;
+            }
 
-                // Initialize the map
-                var map = new google.maps.Map(document.getElementById('map'), {
-                    center: pos,
-                    zoom: 18
+            function findCafe() {
+                // Get the user's current location
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // Initialize the map
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        center: pos,
+                        zoom: 18
+                    });
+
+                    // Search for nearby cafes
+                    var service = new google.maps.places.PlacesService(map);
+                    service.nearbySearch({
+                        location: pos,
+                        radius: sliderRadius,
+                        type: ['cafe']
+                    }, callback);
                 });
 
-                // Search for nearby cafes
-                var service = new google.maps.places.PlacesService(map);
-                service.nearbySearch({
-                    location: pos,
-                    radius: 500,
-                    type: ['cafe']
-                }, callback);
-            });
-
-            // Handle the results of the search
-            function callback(results, status) {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    var names = [];
-                    for (var i = 0; i < results.length; i++) {
-                        names.push(results[i].name);
-                    }
-                    const formattedNames = names.map(name => ({ text: name }));
-                    console.log(names);
-                    console.log(formattedNames);
-                    makeWheel(names,formattedNames);
+                // Handle the results of the search
+                function callback(results, status) {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        var names = [];
+                        for (var i = 0; i < results.length; i++) {
+                            if ((results[i].name).length > 22) {
+                                let modifiedString = (results[i].name).substring(0, 22) + "...";
+                                names.push(modifiedString);
+                            } else {
+                                names.push(results[i].name);
+                            }
+                        }
+                        const formattedNames = names.map(name => ({ text: name }));
+                        //console.log(names);
+                        //console.log(formattedNames);
+                    makeWheel(names, formattedNames);
                 }
             }
 
@@ -78,6 +95,9 @@
                 // Create new wheel object specifying the parameters at creation time.
                 theWheel = new Winwheel({
                     'numSegments': names.length,     // Specify number of segments.
+                    'fillStyle' : '#F2F7FF', // Specify the fill colour for the segments.
+                    'lineWidth' : 2,        // Specify the line width for the segments.
+                    'strokeStyle' : '#0067F6', // Specify the line colour for the segments.
                     'textFontSize': 16,    // Set font size as desired.
                     'responsive': true,  // This wheel is responsive!
                     'segments': formattedNames,   // Define segments including colour and text.
@@ -89,6 +109,7 @@
                     }
                 });
             }
+        }
 
             // -----------------------------------------------------------------
             // Called by the onClick of the canvas, starts the spinning.
