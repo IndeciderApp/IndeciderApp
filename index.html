@@ -15,11 +15,20 @@
     <body>
         <div align="center">
             <h1>Indecider App</h1>
-            <p>Can't pick a cafe?</p>
+            <p style="margin-top: 12px; margin-bottom: 12px;">Help me pick a <span>
+                    <select id="cafeDropdown" style="border: none; border-bottom: 2px solid black; font-size: 1rem;">
+                        <option value='cafe' selected>Cafe</option>
+                        <option value='bar'>Bar</option>
+                        <option value='restaurant'>Restaurant</option>
+                        <option value='book_store'>Book Store</option>
+                        <option value='gas_station'>Petrol Station</option>
+                        <option value='night_club'>Night Club</option>
+                    </select>
+                </span></p>
             <br />
             <input type="range" min="50" max="1000" step="25" id="slider" value="500" class="slider">
             <p style="margin-top: 12px;">Radius: <span id="output">500</span> metres</p>
-            <button onclick="findCafe()">Find Cafes</button>
+            <button onclick="findCafe()">Find venues</button>
             <br />
             <div class="triangle-down"></div>
             <!-- Always set canvas to largest desired size, i.e. desktop PC size, it will be scaled down for smaller devices but never scaled up -->
@@ -39,6 +48,8 @@
             var pos;
             let theWheel;
             var sliderRadius = 500;
+            var dropdownValue = 'cafe';
+            //var selectedValue = 'cafe';
 
             // Get the slider elements
             var slider = document.getElementById("slider");
@@ -49,7 +60,15 @@
                 output.innerHTML = sliderRadius;
             }
 
+            // Get the dropdown element
+            var select = document.getElementById("cafeDropdown");
+            select.onchange = function () {
+                dropdownValue = this.value;
+            }
+
+
             function findCafe() {
+                console.log(dropdownValue);
                 // Get the user's current location
                 navigator.geolocation.getCurrentPosition(function (position) {
                     pos = {
@@ -68,13 +87,14 @@
                     service.nearbySearch({
                         location: pos,
                         radius: sliderRadius,
-                        type: ['cafe']
+                        type: dropdownValue
                     }, callback);
                 });
 
                 // Handle the results of the search
                 function callback(results, status) {
                     if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        console.log(results);
                         var names = [];
                         for (var i = 0; i < results.length; i++) {
                             if ((results[i].name).length > 22) {
@@ -87,29 +107,29 @@
                         const formattedNames = names.map(name => ({ text: name }));
                         //console.log(names);
                         //console.log(formattedNames);
-                    makeWheel(names, formattedNames);
+                        makeWheel(names, formattedNames);
+                    }
+                }
+
+                function makeWheel(names, formattedNames) {
+                    // Create new wheel object specifying the parameters at creation time.
+                    theWheel = new Winwheel({
+                        'numSegments': names.length,     // Specify number of segments.
+                        'fillStyle': '#F2F7FF', // Specify the fill colour for the segments.
+                        'lineWidth': 2,        // Specify the line width for the segments.
+                        'strokeStyle': '#0067F6', // Specify the line colour for the segments.
+                        'textFontSize': 16,    // Set font size as desired.
+                        'responsive': true,  // This wheel is responsive!
+                        'segments': formattedNames,   // Define segments including colour and text.
+                        'animation':           // Specify the animation to use.
+                        {
+                            'type': 'spinToStop',
+                            'duration': 5,     // Duration in seconds.
+                            'spins': 8,     // Number of complete spins.
+                        }
+                    });
                 }
             }
-
-            function makeWheel(names, formattedNames) {
-                // Create new wheel object specifying the parameters at creation time.
-                theWheel = new Winwheel({
-                    'numSegments': names.length,     // Specify number of segments.
-                    'fillStyle' : '#F2F7FF', // Specify the fill colour for the segments.
-                    'lineWidth' : 2,        // Specify the line width for the segments.
-                    'strokeStyle' : '#0067F6', // Specify the line colour for the segments.
-                    'textFontSize': 16,    // Set font size as desired.
-                    'responsive': true,  // This wheel is responsive!
-                    'segments': formattedNames,   // Define segments including colour and text.
-                    'animation':           // Specify the animation to use.
-                    {
-                        'type': 'spinToStop',
-                        'duration': 5,     // Duration in seconds.
-                        'spins': 8,     // Number of complete spins.
-                    }
-                });
-            }
-        }
 
             // -----------------------------------------------------------------
             // Called by the onClick of the canvas, starts the spinning.
